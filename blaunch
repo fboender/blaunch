@@ -1,0 +1,111 @@
+#!/usr/bin/perl -w
+#
+#  blaunch v0.1
+#
+#  Button-bar application laucher.
+#
+#  Copyright (C) 2000, Ferry Boender 
+#  Release under the GPL (General Public License). See the 
+#  COPYING file distributed with this program for more information.
+#
+#  Do not program for money. Program for glory.
+#
+
+use Tk;
+
+my $side = "left"; # horizontal of vertical bar (default horizontal)
+
+#---------------------------------------
+# button: Creates a new button
+#---------------------------------------
+sub button {
+	my ($imgpath, $bgcolor, $bgcolor_hover, $cmd) = @_;
+	
+	my ($error);
+	
+	# check params
+	if ( !(-r $imgpath) ) { $error = "\t$imgpath not readable.\n"; }
+	if ( $bgcolor !~ /^\#/ ) { $error .= "\t$bgcolor not a valid color. See manual.\n"; }
+	if ( $bgcolor_hover !~ /^\#/ ) { $error .= "\t$bgcolor_hover not a valid color. See manual.\n"; }
+
+	if ( $error ) { 
+		print "Error in configuration file: \n";
+		print $error; 
+		return; 
+	}
+	
+	# create button
+	my ($img) = $MW->Photo($imgcount, '-file' => $imgpath);
+	my ($button) = $MW->Button(
+		-highlightthickness => 0,
+		-borderwidth=> 0,
+		-background => $bgcolor,
+		-activebackground => $bgcolor_hover,
+		-activeforeground => "#00FF00",
+		-relief => "flat",
+		-text => "Xterm",
+		'-image' => $img,
+		'-command' => sub { system ($cmd." &"); }
+	)->pack(-side=>$side);
+	
+	# Increase counter or all buttons will have the same icon
+	$imgcount++;
+	
+}
+
+#-----------------------------------------
+# LoadConfig: Loads the configuration file
+#-----------------------------------------
+sub LoadConfig {
+	my ($configfile) = @_;
+	my ($error);
+	
+	# Check readability of configuration file
+	if ( !( -R $configfile ) ) { $error = "\tCan't read configuration file $configfile\n"; }
+
+	if ( $error ) {
+		print "Error:\n";
+		print $error;
+		exit;
+	}
+
+	# Read configuration file
+	open (F, $configfile);
+	@l = <F>;
+	close (F);
+	
+	# parse configuration file and make button out of each line.
+	foreach $f (@l) {
+		# Vertical bar?
+		if ($f =~ /^%/) {
+			if ($f =~ /^%vertical/) {
+				$side = "top";
+			}
+		} 
+		elsif (!($f eq "\n") && ($f !~ /^\#/)) {
+			@options = split(',',$f);
+			foreach (@options) {
+			        s/^\s+//; # strip leading space
+			        s/\s+$//; # strip trailing space
+			}
+			
+			&button ("$options[0]", "$options[1]", "$options[2]", "$options[3]");
+		}
+	}
+}
+
+# create the main window without borders
+$MW = MainWindow->new();
+$MW->overrideredirect(1);
+
+$imgcount = 0;
+
+# find configuration file.
+if    ( -R $ENV{HOME}.'/.blaunch.conf'){ LoadConfig($ENV{HOME}.'/.blaunch.conf'); } 
+elsif ( -R '/etc/blaunch.conf')	{ LoadConfig('/etc/blaunch.conf'); }
+else				{ 
+	print "No config file found!\nPlace you configuration in /etc/blaunch.conf or ~/.blaunch.conf\n"; 
+	exit;
+}
+
+MainLoop;

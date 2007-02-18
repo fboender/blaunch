@@ -1,0 +1,7 @@
+blaunch: List of know bugs
+-------------------------------------------------------------------------------
+
+None that I really know of, though there should be some more error checking, 
+since perl is (imho) quite error sensitive.
+
+If you find any, please report them to fboender@arise.dhs.org

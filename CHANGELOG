@@ -1,0 +1,14 @@
+blaunch: ChangeLog
+------------------------------------------------------------------------------
+
+[23 Dec 2000] <fboender@arise.dhs.org>
+
+    * Worked on README documentation, should be finished now.
+    * Added routine to find configuration file.
+    
+[19 Dec 2000] <fboender@arise.dhs.org>
+
+    * Added configuration file error checking.
+    * Prepared program for release.
+    * Commented code.
+    
